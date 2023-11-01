@@ -158,7 +158,12 @@ function makeSnapshot() {
         }
     }
 
-    var snapshot = addon.makeSnapshot();
+    try {
+        var snapshot = addon.makeSnapshot();
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
 
     if((!snapshot.success && !snapshot.gameTime) || snapshot.gameTime === 0) {
         disconnectFromLeague();

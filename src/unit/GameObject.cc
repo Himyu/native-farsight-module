@@ -38,7 +38,9 @@ void GameObject::LoadFromMemory(DWORD64 base, HANDLE hProcess, bool deepLoad)
     {
         int nameLength = Memory::ReadDWORD64FromBuffer(buff, Offsets::ObjNameLength);
 
-        if (nameLength <= 0 || nameLength > 100) {}
+        if (nameLength <= 0 || nameLength > 100)
+        {
+        }
         else if (nameLength < 16)
         {
             name.resize(nameLength);
@@ -50,6 +52,30 @@ void GameObject::LoadFromMemory(DWORD64 base, HANDLE hProcess, bool deepLoad)
             Memory::Read(hProcess, Memory::ReadDWORD64FromBuffer(buff, Offsets::ObjName), nameBuff, 50);
             name.resize(nameLength);
             memcpy(name.data(), &nameBuff[0], nameLength);
+        }
+
+        try
+        {
+            int displayNameLength = Memory::ReadDWORD64FromBuffer(buff, Offsets::ObjDisplayNameLength);
+
+            if (displayNameLength < 16)
+            {
+                displayName.resize(displayNameLength);
+                memcpy(displayName.data(), &buff[Offsets::ObjDisplayName], displayNameLength);
+            }
+            else
+            {
+                char displayNameBuff[50];
+                Memory::Read(hProcess, Memory::ReadDWORD64FromBuffer(buff, Offsets::ObjDisplayName), displayNameBuff, 50);
+                displayName.resize(displayNameLength);
+                memcpy(displayName.data(), &displayNameBuff[0], displayNameLength);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            displayName.resize(5);
+            memcpy(displayName.data(), "N/A", 5);
+            throw WinApiException(e.what());
         }
 
         int displayNameLength = Memory::ReadDWORD64FromBuffer(buff, Offsets::ObjDisplayNameLength);
